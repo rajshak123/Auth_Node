@@ -69,7 +69,14 @@ catch((e) => {
 })
 
 })
-
+app.post('/login',(req,res)=>{
+    User.findByUserCredentials(req.body.email,req.body.password).then((user)=>{
+    res.status(200).send(user)
+    }).catch((e)=>{
+        res.status(400).send();
+        
+    })
+})
 app.get('/user/me',authenticate,(req,res)=>{
     res.send(req.user);
 })

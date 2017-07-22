@@ -57,7 +57,7 @@ var decoded;
 try{
     decoded=jwt.verify(token,'abc123');
 }catch(e){
-    return new Promise.reject();
+    return  Promise.reject();
 }
 
 return User.findOne({
@@ -65,6 +65,26 @@ return User.findOne({
     'tokens.token':token,
     'tokens.access':'auth'
 })
+
+}
+UserSchema.statics.findByUserCredentials=function(email,password){
+var User=this;
+return User.findOne({email}).then((user1)=>{
+    if(user1){
+       return new Promise((resolve,reject)=>{
+           bcryptjs.compare(password,user1.password,(err,res)=>{
+               if(res)
+                   resolve(user1);
+               else
+                   reject();
+           })
+           })
+    }else{
+        return Promise.reject();
+    }
+})
+
+
 
 }
 UserSchema.pre('save',function(next){
