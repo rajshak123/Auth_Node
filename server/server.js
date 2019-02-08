@@ -6,31 +6,42 @@ const _ = require('lodash')
 const {
     ObjectId
 } = require('mongodb')
-var {
+let {
     mongoose
 } = require('./db/mongoose')
-var {
+let {
     Dishes
 } = require('./models/Dishes')
-var {
+let {
     User
 } = require('./models/users')
 const {
     SHA256
 } = require('crypto-js')
-
+const cors = require('cors');
 
 const bodyParser = require('body-parser')
-var app = express()
+let app = express()
 app.use(bodyParser.json())
+const corsOptions = {
+    exposedHeaders: 'Authorization',
+};
+app.use(cors(corsOptions));
 
-var authenticate = (req, res, next) => {
 
-    var token = req.header('Bearer');
-    if (!token) {
+let authenticate = (req, res, next) => {
+
+    let jwttoken = req.headers['authorization'];
+
+    let jwtTokenArray = jwttoken.split(' ')
+    let token = jwtTokenArray[1]
+
+    if (!jwttoken || !token) {
         next()
     } else {
+        console.log(`here`)
         User.findByToken(token).then((user) => {
+            console.log(user)
             if (!user) {
                 next()
             } else
@@ -41,11 +52,12 @@ var authenticate = (req, res, next) => {
         })
     }
 
-
 }
-const port = process.env.PORT || 5000;
+
+const port = process.env.PORT || 3090;
+
 app.post('/todos', (req, res) => {
-    var todo = new Todo({
+    let todo = new Todo({
         text: req.body["text"]
     })
     todo.save().then((docs) => {
@@ -57,6 +69,8 @@ app.post('/todos', (req, res) => {
         "msg": "bad request"
     }))
 })
+
+
 app.get('/todos/', (req, res) => {
     Todo.find().then((docs) => {
         res.status(200).json({
@@ -68,7 +82,7 @@ app.get('/todos/', (req, res) => {
     }))
 })
 app.get('/todos/:id', (req, res) => {
-    var id = req.params["id"];
+    let id = req.params["id"];
     console.log(id)
     Todo.findById(req.params.id).then((docs) => {
         res.status(200).json({
@@ -82,23 +96,22 @@ app.get('/todos/:id', (req, res) => {
 
 
 app.post('/signup', (req, res) => {
-    console.log('here');
-    var body = _.pick(req.body, ['email', 'password'])
+    let body = _.pick(req.body, ['email', 'password'])
     User.findUserByEmail(body.email).then(
         res1 => {
             if (res1) {
-                console.log('true')
-                res.status(400).json({
+
+                res.status(200).json({
                     'err': 'Already present'
                 })
             } else {
-                console.log("false")
-                var user = new User(body);
+
+                let user = new User(body);
                 user.save().then((doc) => {
                     return doc.generateAuthToken()
                 }).
                 then((token) => {
-                    res.header('Bearer', token).json({
+                    res.header('Authorization', `Bearer ${token}`).json({
                         'email': user['email']
                     })
                 })
@@ -114,24 +127,24 @@ app.post('/signin', (req, res) => {
     User.findByUserCredentials(req.body.email, req.body.password).then((user) => {
         if (user) {
             user.generateAuthToken().then(token => {
-                res.header('Bearer', token).json({
+                res.header('Authorization', `Bearer ${token}`).json({
                     'email': user['email']
                 })
             })
         } else {
-            res.status(400).json({
+            res.status(200).json({
                 'err': 'User not found'
             })
         }
     }).catch((e) => {
         res.status(400).send();
-
     })
 })
-app.get('/user/me', authenticate, (req, res) => {
-    // console.log(req.user)
+
+app.get('/getProductList', authenticate, (req, res) => {
+    console.log(req.user)
     if (!req.user) {
-        return res.status(400).json({
+        return res.status(200).json({
             'err': 'User not authenticated'
         })
     } else {

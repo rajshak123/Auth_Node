@@ -66,6 +66,7 @@ UserSchema.statics.findByToken = function (token) {
     } catch (e) {
         return Promise.reject();
     }
+    console.log(decoded._id);
     return User.findOne({
         '_id': decoded._id,
         'tokens.token': token,
@@ -90,19 +91,19 @@ UserSchema.statics.findByUserCredentials = function (email, password) {
         } else {
             return false
         }
-    }).catch(e => { 
+    }).catch(e => {
         return Promise.reject()
     })
 }
 
-UserSchema.statics.findUserByEmail = (email) => { 
+UserSchema.statics.findUserByEmail = (email) => {
     return User.findOne({
         email
     }).then((user1) => {
         if (user1) {
             return true
-        }
-        else { return false
+        } else {
+            return false
         }
     })
 }

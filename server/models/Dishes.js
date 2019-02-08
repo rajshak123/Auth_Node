@@ -13,39 +13,41 @@ var Dishes = mongoose.model('Dishes', {
     },
     description: {
         type: String,
-        required:false,
+        required: false,
         default: null
     },
     menus_appeared: {
         type: Number,
-        required:false,
+        required: false,
         default: null
     },
     times_appeared: {
         type: Number,
-        required:false,
+        required: false,
         default: null
     },
     first_appeared: {
         type: Number,
-        required:false,
+        required: false,
         default: null
     },
     last_appeared: {
         type: Number,
-        required:false,
+        required: false,
         default: null
     },
     lowest_price: {
         type: Number,
-        required:false,
+        required: false,
         default: null
     },
     highest_price: {
         type: Number,
-        required:false,
+        required: false,
         default: null
     },
 
 })
-module.exports={Dishes}
+module.exports = {
+    Dishes
+}
